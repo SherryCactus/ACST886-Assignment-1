@@ -1,0 +1,178 @@
+---
+title: "Assignment 1"
+author: "Sherry Mu"
+output:
+  word_document: default
+  html_document: default
+---
+
+#Question 1
+Assume Bill's annual repayments are $R_{B}$ and the interest rate is i. 
+
+Since the first instalment is due 19/03/2020, know that R is paid annually in arrear and the last repayment will be due 19/03/2050.
+
+####Firstly, set the function to calculate annuities
+```{r}
+Annuity <- function(i,n){
+  (1-(1+i)^(-n))/i
+}
+```
+
+####Thus, calculate $R_{B}$ by sustituting everyting in the equation $$600000 = R_{B}a_{30}^{@i}$$
+```{r}
+i <- 0.035
+n <- 30
+Rb <- 600000/Annuity(i, n)
+```
+
+####Bill's annual repayments are
+```{r, echo=FALSE}
+Rb
+```
+
+#Question 2
+##(a)
+Let Scott's loan repayments be $R_{S}$
+
+####$R_{S}$ can thus be calculated by $$600000-100000(1+i)^{-n} = (R_{S}+100000i)a_{30}^{@i}$$
+```{r}
+i <- 0.035
+n <- 30
+Rs <- (600000-100000*(1+i)^(-n))/Annuity(i, n) - 100000*i
+```
+
+####Scot's annual repayments are
+```{r, echo=FALSE}
+Rs
+```
+
+##(b)
+If Scot paid $27185.67 together with offset interest of $3500 per annual for 30 years, the PV of all his instalments will be $$PV_{S} = (R_{S}+1000000i)a_{30}^{@i}$$
+```{r}
+PV <- (Rs + 100000*i)*Annuity(i,n)
+PV
+```
+which is greater than his net balance, 500000. This indicates that Scot can pay his repayments for less than 30 years to cover his loan.
+
+Now, want to find the exat years that the loan extinguished
+```{r}
+fn <- function(n){
+  (600000-100000) - (Rs+100000*i)*Annuity(i,n)
+}
+N <- uniroot(fn, c(0,30))
+N$root
+```
+
+This means that Scot will pay $30685.67 annually since 19/03/2020 for 24 years, and at the 25th year, on 19/03/2045, he will need to pay
+```{r}
+fn(24)*(1+i)^25
+```
+
+#Question 3
+##(a)
+As Bill will pay Theresa $1000 annually for 30 years, the total PV of her commissions will be
+```{r}
+i <- 0.035
+n <- 30
+PVt <- 1000*Annuity(i,n)
+PVt
+```
+
+##(b)
+The effective interest rate to Bill will be lower than 3.5%.
+
+This is because combining with Theresa's total commission payments, the PV of Bill's total loan will be increased. However, Bill is still paying $R_{B}$ without adding the $1000 commission payment each year. This means that the $1000 will be paid by sacrificing part of his inerest earnings, and hence the effective interest that the bank requires on its fund must be lower than 3.5%.
+
+##(c)
+####Firstly, assume the effective rate to Bill is j and we want to solve $$600000 + 1000a_{30}^{@i} = R_{B}a_{30}^{@j}$$
+```{r}
+n <- 30
+fi <- function(j){
+  600000+PVt - Rb*Annuity(j,n)
+}
+```
+
+####By setting thr function $f = 600000 + 1000a_{30}^{@i} - R_{B}a_{30}^{@j}$ equals 0, we can hence find the effective rate j
+```{r}
+j <- uniroot(fi, interval = c(0.0000001, 0.035))
+```
+
+Theoretically the range of j will be between 0 and 3.5%, but in Question 1 the "Annuity" function is set divided i. Hence in the uniroot function above, we just try to set the lower end point of j extremely small to make the value valid.
+
+####The effective rate is
+```{r, echo=FALSE}
+j$root
+```
+
+##(d)
+As in (a), 3.5% is indicated a valuation interest rate, Bill's loan will be calculated as 600000 together with an annuity of 1000 p.a. for 30 years at j (the effective rate calculated above).
+
+Bill's new annual payment will be
+```{r}
+n <- 30
+Rb_n <- (600000+1000*Annuity(j$root,n))/Annuity(j$root,n)
+Rb_n
+```
+
+Hence, his annual payment is increased by
+```{r}
+Rb_n - Rb
+```
+
+#Question 4
+####Firstly, set up a function to calculate age in years
+```{r}
+age <- function(from, to){
+  n <- as.POSIXlt(c(from, to))
+  age <- n$year[2]-n$year[1]
+  age
+}
+```
+
+##Life A
+###(a) age next birthday at death
+```{r}
+age("1965/05/16", "1995/05/16")
+```
+
+###(b) age last birthday on 1 January before death
+```{r}
+age("1965/05/16", "1993/05/16")
+```
+
+###(c) age at birthday in the policy year of death
+```{r}
+age("1965/05/16", "1994/05/16")
+```
+
+##Life B
+###(a) age next birthday at death
+```{r}
+age("1922/03/01", "1994/03/01")
+```
+
+###(b) age last birthday on 1 January before death
+```{r}
+age("1922/03/01", "1992/03/01")
+```
+
+###(c) age at birthday in the policy year of death
+```{r}
+age("1922/03/01", "1993/03/01")
+```
+
+##Life C
+###(a) age next birthday at death
+```{r}
+age("1942/09/21", "1996/09/21")
+```
+
+###(b) age last birthday on 1 January before death
+```{r}
+age("1942/09/21", "1995/09/21")
+```
+
+###(c) age at birthday in the policy year of death
+```{r}
+age("1942/09/21", "1996/09/21")
+```
